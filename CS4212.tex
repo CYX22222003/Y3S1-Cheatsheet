@@ -1,0 +1,335 @@
+\documentclass[10pt]{article}
+\usepackage{multicol}
+\usepackage{calc}
+\usepackage{ifthen}
+\usepackage[landscape]{geometry}
+\usepackage{amsmath,amsthm,amsfonts,amssymb}
+\usepackage{color,graphicx,overpic}
+\usepackage{hyperref}
+\usepackage{listings}
+\pdfinfo{
+  /Title (CS4212 Cheatsheet)
+  /Creator (TeX)
+  /Producer (pdfTeX 1.40.0)
+  /Author (Chen Yixun)
+  /Subject (Example)
+  /Keywords (pdflatex, latex,pdftex,tex)}
+\lstdefinelanguage{JavaScript}{
+  morekeywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
+  morecomment=[s]{/*}{*/},
+  morecomment=[l]//,
+  morestring=[b]",
+  morestring=[b]'
+}
+% This sets page margins to .5 inch if using letter paper, and to 1cm
+% if using A4 paper. (This probably isn't strictly necessary.)
+% If using another size paper, use default 1cm margins.
+\ifthenelse{\lengthtest { \paperwidth = 11in}}
+    { \geometry{top=.15in,left=.15in,right=.15in,bottom=.15in} }
+    {\ifthenelse{ \lengthtest{ \paperwidth = 297mm}}
+        {\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+        {\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+    }
+
+% Turn off header and footer
+\pagestyle{empty}
+
+% Redefine section commands to use less space
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0mm}%
+                                {-1ex plus -.5ex minus -.2ex}%
+                                {0.5ex plus .2ex}%x
+                                {\normalfont\large\bfseries}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{0mm}%
+                                {-1explus -.5ex minus -.2ex}%
+                                {0.5ex plus .2ex}%
+                                {\normalfont\normalsize\bfseries}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{3}{0mm}%
+                                {-1ex plus -.5ex minus -.2ex}%
+                                {1ex plus .2ex}%
+                                {\normalfont\small\bfseries}}
+\makeatother
+
+% Define BibTeX command
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% Don't print section numbers
+\setcounter{secnumdepth}{0}
+
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt plus 0.5ex}
+
+
+%My Environments
+\newtheorem{example}[section]{Example}
+% ------------------
+
+\begin{document}
+\raggedright
+\scriptsize
+\begin{multicols}{3}
+\subsection{x86 machine instruction}
+
+% X86 schematic
+% \includegraphics[width=4.0cm, height=2.5cm]{images/compiler_x86_scheme.png}
+
+1. \textbf{arithmetic operations}:
+
+movq src, dest; negq dest; addq src, dest; subq src, dest; imulq src, REG
+
+2. \textbf{logic/bit manipulation operations}:
+
+notq dest; andq src, dest; orq src, dest; xorq src, dest; sarq amt, dest (arithmetic shift right); shlq amt dest (arithmetic shift left); shrq amt, dest (bitwise shift right) 
+
+3. \textbf{X86 Operands and memory operations}
+
+- \underline{Imm}: 64-bit literal signed int
+
+- \underline{Lbl}: machine address will be resolved by assembler/linked/loader
+
+- \underline{Reg}: 16 registers
+
+- \underline{Ind}: 
+$\bigl[\text{Base: Reg}\bigr]\bigl[\text{Index: Reg, scale}\bigr]\bigl[\text{disp}\bigr] \rightarrow$ Format: $\text{displ(base, ind\_reg, ind\_scale)} \rightarrow \text{addr(ind) = base + (index $\times$ scale) + disp}$
+
+For indirect: if use as an operand, read the value from its memory $MEM[addr(ind)]$, if use in \textbf{leaq} Ind, DEST, $DEST \rightarrow addr(Ind)$ loads a pointer into DEST.
+
+\textbf{pushq} SRC $\rightarrow$ rsp $\leftarrow$ rsp - 8; Mem[rep] $\leftarrow$ SRC
+
+\textbf{popq} DEST $\rightarrow$ DEST $\rightarrow$ MEM[rsp]; rsp $\leftarrow$ rsp + 8
+
+4. \textbf{X86 Flags and Condition Codes}
+
+\textbf{OF}: overflow flag; \textbf{SF}: sign flag; \textbf{ZF}: zero flag.
+
+\textbf{Conditional Code}:
+
+- $eq$: ZF is set
+
+- $neq$: not ZF
+
+- $lt$: SF $\neq$ OF $(SF \wedge \neg OF) \vee (\neg SF \wedge OF)$ 
+
+- $ge$: not $IT$ HOLDS $\implies$ $SF \equiv OF$
+
+- $le$: $lt$ OR ZF
+
+- $gt$: Not $le$
+
+5. \textbf{Conditional Instructions}:
+
+- cmpq SR1, SR2: compute SR2 - SR1, set condition flag
+
+- setb CC DEST: set DEST's lower byte
+
+- jCC SRC: rip $\leftarrow$ if CC then SRC (label that will translated by linked and loader) else do nothing
+
+6. \textbf{Jumps, Calls and Returns}
+
+- jmp SRC: rip $\leftarrow$ SRC
+
+- callq SRC: pushq rip; rip $\leftarrow$ SRC
+
+- retq: pop into rip (the current top of the stack should contains the expected address for RIP to jump to so as to fetch next insn)
+
+7. \textbf{C Memory Model}
+
+\underline{code \& data}: compiled code, constant string
+
+\underline{heap}: dynamically allocated objects, allocated via "malloc"
+
+\underline{stack}: stores local variables, stores the return address of the function
+
+8. \textbf{Calling convention}
+
+\textbf{Caller Protocol}
+Set up arguments: $rdi \rightarrow arg1;\, rsi \rightarrow arg2;\ rdx \rightarrow arg3;\ rcx \rightarrow arg4;\ r8 \rightarrow arg5;\ r9 \rightarrow arg6$
+
+Push arguments > 6 into stack from right to left: arg7 is higher at the stack (lower address) compared to arg8 (\underline{caller save})
+
+for n > 6, the nth argument is located at (((n-7)+2)*8)(rbp)
+
+
+\textbf{Call instruction} ($callq\ g$)
+
+1. Push the return address on to the stack
+2. Set rip to address of function $g$;
+
+\textbf{Callee Protocol}
+
+1. Store old $rbp$ by $pushq\ rbp$
+2. Adjust rbp to new base by $movq\ rsp\ rbp$
+3. Increase the stack space (scratch space) + access arguments from register or offset from rbp + save register $r12 - r15$, $rbp$, $rbx$, and restore them when g returns (\underline{callee save register})
+
+\textbf{Callee Epilogue (after execution)}
+1. Move results into $rax$
+2. Deallocate the scratch space (restore saved register)
+3. Restore the caller's rbp by pop into rsp + restore caller's rbp to the top of the stack
+4. Execute return instruction $\rightarrow$ pop stack refers to rip
+
+
+\subsection{LLVM intermediate representation}
+
+1. \textbf{Basic blocks and control flow}
+
+\begin{lstlisting}[language=ml]
+    type block = {
+        insns: (uid * insn) list;
+        term: (uid * terminator)
+    }
+
+    type cfg = block * (lbl * block) list
+\end{lstlisting}
+
+2. \textbf{LL Storage model}
+
+Local variables: $\%uid$ (single static assignment invariant); global decls $@gid$; stack allocated: $alloca$ insn (allocate a stack space and return a reference to it); heap allocated: $malloc$ function call
+
+3. \textbf{Structured data}
+
+- Contiguous words of memory $\rightarrow$ data type gives info of \underline{size} to allocate compiled time storage space and \underline{struct} to index; padding and alignment to ensure homogeneous layout;
+\newline
+- C procedure call: copy in/copy out $\rightarrow$ copy arguments (in structured type) in and copy results out; use pointer to call by reference $\rightarrow$ returning a pointer to stack is problematic.
+\newline
+- Array: allocated on stack if size is known at compile time, and use $malloc$ for heap allocation. Multi-dimensional array is stored in row-major OR column major order (depends on compiler); Java and ML has use array of array ptrs for multidimensional; Bound check $\rightarrow$ additional overhead to store the size of the array
+\newline
+- Strings: null terminated characters array. String literal in text segment and read only.
+
+4. \textbf{Misc topics}
+
+- \textbf{Tagged datatypes}: enumeration/ML datatypes: value is a pointer to a pair of $(tag, data)$
+
+- \textbf{Switch compilation}: cascading ifs and jumps $\rightarrow$ sequence of ICMP and BR in LLVM; 
+
+5. \textbf{GEP and Bitcast in LLVM}
+
+- Syntax $insn ::= getelementptr\ t*\ \%val,\ t1\ idx1,\ t2\ idx2\ ,\dots$, the first idx is step through the pointer
+
+- never dereferences the address it’s calculating: 1) GEP only produces pointers by doing arithmetic 2) It doesn’t actually traverse the links of a data structure
+
+- bitcast: unsafe cast $\rightarrow$ may cause seg fault or corrupt memory
+
+\subsection{Lexing}
+
+1. \textbf{Regular Expression}
+$\epsilon$ Epsilon stands for the empty string
+
+‘a’ - An ordinary character stands for itself
+
+R1 | R2 - choice of R1 or R2
+
+R1 R2 - R1 followed by R2
+
+R* - Kleene star, stands for zero or more repetitions of R
+
+\textbf{Useful extensions}:
+
+“foo” - Strings, equivalent to 'f''o''o'
+
+R+ - One or more repetitions of R, equivalent to RR*
+
+R? - Zero or one occurrences of R, equivalent to ($\epsilon$|R)
+
+$\bigl['a'-'z'\bigr]$ - One of a or b or c or $\dots$ z, equivalent to (a|b|$\dots$|z)
+
+\verb|[^'0'-'9']| - Any character except 0 through 9
+
+R as x - Name the string matched by R as x
+
+\textbf{Lexer generator}
+
+For each regular expression on token, attach action $A_i$ which will be run when re is mached
+
+3. \textbf{NFA}
+
+RE -> NFA:
+
+
+
+4. \textbf{DFA}
+
+\subsection{Parsing}
+
+1. \textbf{Syntax Analysis and Context Free Grammar}
+
+2. \textbf{CFG derivation and Parse tree}
+
+3. \textbf{General Parsing Issues}:
+
+- Associativity
+
+- Ambiguity
+
+- Precedence
+
+4. \textbf{LL(1) Grammar}
+
+5. \textbf{LR(0) Grammar}
+
+6. \textbf{Parsing conflict}
+
+\subsection{Lambda Calculus}
+
+1. \textbf{Untyped Lambda Calculus Syntax}
+
+2. \textbf{Free Variables and Scoping}
+
+3. \textbf{Values and Substitution}
+
+4. \textbf{Operational Semantics}
+
+5. \textbf{Free Variable Calculation and Variable Capture}
+
+\subsection{Semantic Analysis - Type Checking}
+
+1. \textbf{Variable Scoping}
+
+2. \textbf{Semantic Analysis and symbol table}
+
+3. \textbf{Type and type system}
+
+4. \textbf{Type safety}
+
+5. \textbf{Well-formed types}
+
+6. \textbf{Type-checking statement}
+
+7. \textbf{Subtyping and upper bounds}
+
+\subsection{Code optimization}
+
+1. \textbf{Constant folding}
+
+2. \textbf{Copy propagation}
+
+3. \textbf{Dead Code Elimination}
+
+4. \textbf{Unreachable/Dead Code}
+
+5. \textbf{Inlining}
+
+6. \textbf{Loop Invariant Code Motion}
+
+7. \textbf{Strength Reduction}
+
+9. \textbf{Loop Unrolling}
+
+9. \textbf{Code Specialization}
+
+10. \textbf{Common Subexpression Elimination}
+
+11. \textbf{Liveness Analysis}
+
+12. \textbf{Reaching Definition Analysis}
+
+13. \textbf{Available Expressions Analysis}
+
+14. \textbf{General Dataflow Analysis Framework}
+
+15. \textbf{Register Allocation Algorithm}
+
+
+\end{multicols}
+\end{document}

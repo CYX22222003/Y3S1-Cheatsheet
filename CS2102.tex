@@ -1,0 +1,460 @@
+\documentclass[10pt]{article}
+\usepackage{multicol}
+\usepackage{calc}
+\usepackage{ifthen}
+\usepackage[landscape]{geometry}
+\usepackage{amsmath,amsthm,amsfonts,amssymb}
+\usepackage{color,graphicx,overpic}
+\usepackage{hyperref}
+\usepackage{listings}
+% \usepackage{unicode-math}
+\usepackage{amsmath}
+\usepackage{stmaryrd}
+\usepackage{MnSymbol}
+\usepackage{amssymb}
+
+\pdfinfo{
+  /Title (CS2102 Cheatsheet)
+  /Creator (TeX)
+  /Producer (pdfTeX 1.40.0)
+  /Author (Chen Yixun)
+  /Subject (Example)
+  /Keywords (pdflatex, latex,pdftex,tex)}
+\lstdefinelanguage{JavaScript}{
+  morekeywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
+  morecomment=[s]{/*}{*/},
+  morecomment=[l]//,
+  morestring=[b]",
+  morestring=[b]'
+}
+% This sets page margins to .5 inch if using letter paper, and to 1cm
+% if using A4 paper. (This probably isn't strictly necessary.)
+% If using another size paper, use default 1cm margins.
+\ifthenelse{\lengthtest { \paperwidth = 11in}}
+    { \geometry{top=.15in,left=.15in,right=.15in,bottom=.15in} }
+    {\ifthenelse{ \lengthtest{ \paperwidth = 297mm}}
+        {\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+        {\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+    }
+
+% Turn off header and footer
+\pagestyle{empty}
+
+% Redefine section commands to use less space
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0mm}%
+                                {-1ex plus -.5ex minus -.2ex}%
+                                {0.5ex plus .2ex}%x
+                                {\normalfont\large\bfseries}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{0mm}%
+                                {-1explus -.5ex minus -.2ex}%
+                                {0.5ex plus .2ex}%
+                                {\normalfont\normalsize\bfseries}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{3}{0mm}%
+                                {-1ex plus -.5ex minus -.2ex}%
+                                {1ex plus .2ex}%
+                                {\normalfont\small\bfseries}}
+\makeatother
+
+% Define BibTeX command
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% For CS2102 only
+% \def\ojoin{\setbox0=\hbox{$\Join$}%
+% \rule[0.1ex]{.27em}{.4pt}\llap{\rule[1.3ex]{.27em}{.4pt}}}
+% \def\leftouterjoin{\mathbin{\ojoin\mkern-5.8mu\Join}}
+% \def\rightouterjoin{\mathbin{\Join\mkern-5.8mu\ojoin}}
+% \def\fullouterjoin{\mathbin{\ojoin\mkern-5.8mu\Join\mkern-5.8mu\ojoin}}
+
+\usepackage[nomath,notext,notextcomp,not1]{stix2}
+
+% yoink the minimial definitions we need from stix2.sty
+\DeclareFontEncoding               {LS1}{}{}
+\DeclareFontSubstitution           {LS1}{stix2}    {m}{n}
+\DeclareSymbolFont{symbols2}       {LS1}{stix2frak}{m}{n}
+\SetSymbolFont{symbols2}     {bold}{LS1}{stix2frak}{b}{n}
+\DeclareMathSymbol{\leftouterjoin }{\mathop}{symbols2}{"11}
+\DeclareMathSymbol{\rightouterjoin}{\mathop}{symbols2}{"12}
+\DeclareMathSymbol{\fullouterjoin }{\mathop}{symbols2}{"13}
+
+% Don't print section numbers
+\setcounter{secnumdepth}{0}
+
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt plus 0.5ex}
+
+
+%My Environments
+\newtheorem{example}[section]{Example}
+% -----------------------------------------------------------------------
+
+\begin{document}
+\raggedright
+\scriptsize
+\begin{multicols}{3}
+\subsection{SQL}
+1. \textbf{SELECT} statement
+
+Basic form:
+\begin{lstlisting}[language=SQL]
+    SELECT [DISTINCT] target-list
+    FROM relation-list
+    [WHERE conditions]
+\end{lstlisting}
+
+Additional Constructs: 
+
+1) Wildcard for all attributes; 
+
+2) expr \textbf{BETWEEN} (lower) \textbf{AND} (upper); 
+
+3) String concatenation - stringA || stringB; 
+
+4) AS for rename; 
+
+5) DISTINCT toe eliminate duplicates; 
+
+6) IS NULL/IS NOT NULL (arithmic on NULL return NULL, comparison return UNKNOWN)
+
+7) Pattern matching: "\_" matches single character, "\%" matches any sequence of 0 or more characters
+
+2. Set operations
+
+Union-compatible: same number of columns, same order of data types
+
+Queries: UNION, INTERSECT, EXCEPT, UNION ALL, INTERSECT ALL, EXCEPT ALL
+
+
+3. Join Operations
+
+1) JOIN = cross product + attribute selection
+
+2) NATURAL JOIN: automatically combines two tables by matching rows based on columns with the same name and compatible data types
+
+- join conditions implied by attribute names
+
+- defined for equality comparisons
+
+- one instance of matching attributes
+
+3) OUTER JOIN: INNER JOIN + all remaining from left/right/both tables
+
+4. Subqueries
+
+1) IN/ NOT IN: expr IN/NOT IN (subquery)
+
+- subquery must return exactly one column
+
+- IN returns true if expr matches any row
+
+- NOT IN the other way round
+
+2) ANY/SOME
+
+- expr op ANY(subquery)
+
+- must return exactly one column, expr is compared to each subquery row using op
+
+- ANY returns TRUE if comparision evaluates to TRUE for at least one subquery row
+
+3) ALL queries
+- if comparison is true for all
+
+4) Correlated subqueries
+- subquery uses value from outer query
+
+- result of subquery depends on outer query
+
+5) Exists
+
+- EXISTS(subquery) returns true if subquery returns at least one tuple
+
+6) Scalar Subqueries
+- return a single value one row one column
+- can be used as an expression in queries
+
+7) ROW construtor
+- Previous subqueries can have more than one attribute/column
+- row constructor need to match
+
+5. Sorting and ranked-based selection
+- ORDER BY
+- LIMIT
+- OFFSET: specify the position of first target to be considered
+
+6. Aggregation
+- MIN, MAX, AVG, COUNT, SUM
+
+- Interpretation of NULL values
+
+1) Non-empty relation with attribute A -> ignore, only non-null will be considered
+
+2) empty relation , count will return 0 and the rest will be null
+
+3) non-empty with only null, count will return 0 but count(*) may return n, the rest null
+
+7. Grouping
+
+
+GROUP BY
+
+logical partition of relations/tuples into groups based on values of a specific attributes; application of aggregation over each group
+
+Column $A_{i}$ appears in SELECT clause
+- $A_i$ in GROUP BY
+- $A_i$ as input of aggregation function
+- PK of R appears in GROUP BY
+
+
+HAVING
+
+- conditions check for each group defined by GROUP BY clause
+
+
+Conceptual evaluation order:
+
+FROM $\rightarrow$ WHERE $\rightarrow$ GROUP BY $\rightarrow$ HAVING $\rightarrow$ SELECT $\rightarrow$ ORDER BY $\rightarrow$ LIMIT/OFFSET
+
+8. Expressions
+
+Conditional expression: 
+
+CASE 
+    WHEN cond1 THEN expr1 
+    WHEN cond2 THEN expr2 
+    ELSE expr0
+END
+
+
+Coalesce(v1,v2,v3..) return first non null value in the list of input arguments
+
+NULLIF(v1, v2) return null if v1 = v2 else v1
+
+Common Table Expression
+
+\begin{lstlisting}[language=sql]
+with CTE_NAME AS (
+    CTE_BODY
+) CTE_USAGE
+\end{lstlisting}
+
+
+9. Views
+virtual tables, only parts of a table are of interested; permanently named query, can be used like normal tables, result of query is not permanently stored
+
+
+\subsection{Relation Algebra}
+
+\textbf{closure property}: relations are closed under RA. All input operands and the outputs of all operators are relations; The output of one operator can serve as input for subsequent operators. allows nesting of relational algebra
+
+\textbf{Renaming}:  $\rho(R, S)$ , $\rho(R, R(a_1 \rightarrow b_1, a_2 \rightarrow b_2 \dots a_n \rightarrow b_n))$,  $\rho(R, S(a_1 \rightarrow b_1, a_2 \rightarrow b_2 \dots a_n \rightarrow b_n))$
+
+\textbf{Selection}: $\sigma_c(R)$ all tuples that satisfy the selection condition $c$
+
+\textbf{Projection}: $\pi_l(R)$ projects all attributes of a relation specified in list $l$, duplicates tuples are removed from output
+
+\textbf{Union compatibility}: 1) same number of attributes 2) same or compatible domains 3) do not have to use the same attribute names
+
+\textbf{Set operator - union}: $R \cup S$
+
+\textbf{Set operator - intersection}: $R \cap S$
+
+\textbf{Set operator - set difference}: $R - S$
+
+\textbf{Cross product}: $R \times S$
+
+\textbf{Inner join}: $R \Join_\theta S$ = $\sigma_{\theta}(R \times S)$; Equi-join: $\Join_=$ 
+
+\textbf{Natural join}: same as equi-join but the join is performed over all attributes that $R$ and $S$ have in common
+
+\textbf{Outer join}: 
+
+dangling tuples: $dangle(R \Join_\theta S) \subseteq R$ i.e. tuples in $R$ do not match with tuples in the other relation of interest
+
+$R \leftouterjoin S$ = $R \Join_\theta S\ \cup\ (dangle(R \Join_\theta S) \times \{null(S)\})$ 
+
+$R \rightouterjoin S$ = $R \Join_\theta S\ \cup\ \{null(R)\} \times (dangle(S \Join_\theta R)$
+
+$R \fullouterjoin S$ = $R \Join_\theta S\ \cup\ \{null(R)\} \times (dangle(S \Join_\theta R) \cup\ (dangle(R \Join_\theta S) \times \{null(S)\})$
+
+\subsection{Stored procedures}
+
+\includegraphics[width=9.0cm, height=4.5cm]{images/stored_procedures.png}
+
+1. Return a single tuple from existing table by specify the table name as return type
+
+2. specify OUT parameter and return a RECORD type, INOUT params are for both input and output
+
+3. Specify a table name with SETOF before to return all tuples
+
+4. SETOF RECORD + OUT params for arbitrary table | TABLE + return paramters
+
+Procedure: a function has no return value
+
+Cursor:
+
+\includegraphics[width=7cm, height=4.5cm]{images/sql_cursor.png}
+
+\subsection{Triggers}
+
+Trigger: check if event occur. Binds \underline{trigger function} to operations on table or view; Trigger function: action executed
+
+\includegraphics[width=9cm, height=5cm]{images/trigger_syntax.png}
+
+Note: must return a trigger; checks for insert or update statement for table downloads; inconsistent rows throw exception and effect will be rolled back
+
+\textbf{OLD and NEW}
+
+\textbf{NEW (OLD)} refers to the what the row like \textbf{after (before)} the operation
+
+\includegraphics[width=7cm, height=3.5cm]{images/trigger_view_syntax.png}
+
+\includegraphics[width=7cm, height=2cm]{images/trigger_when.png}
+
+NO SELECT IN WHEN; NO OLD IN WHEN FOR insert; NO NEW in WHEN for delete; NO WHEN FOR INSTEAD OF
+
+Trigger granularity: row-level trigger executes function for each tuple; statement-level trigger execute trigger function once per statement
+
+\includegraphics[width=7cm, height=2cm]{images/trigger_granularity.png}
+
+\subsection{Functional dependencies}
+
+\textbf{Anomalies} 
+
+redundant storage; update anomaly; deletion anomaly; insertion anomaly
+
+Sources: some cols \textbf{uniquely determined} by other cols
+
+\textbf{Functional dependency}
+
+$r$ of schema $R$ satisfies the functional dependencies $\sigma: X \rightarrow Y$ with $X \subseteq R \wedge Y \subseteq R  \Leftrightarrow $ ($r \text{ agrees on } X \implies r \text{ agrees on } Y)$  
+
+Set Functional Dependencies: $r$ satisfies all $\sigma \in \Sigma$ of $R$
+
+\textbf{Triviality}:
+
+1. \textbf{Trivial}:  $\sigma : X \rightarrow Y$ is trivial iff $Y \subseteq X$
+
+2. \textbf{Non-Trivial}: \dots iff $Y \not\subseteq X$
+
+3. \textbf{Completely non-trivial}: \dots  iff $Y \not \equiv \emptyset \wedge Y \cap X \equiv \emptyset$
+
+\textbf{Keys}
+
+1. \textbf{Superkey}: let $R$ be a relation. Let $S \subseteq R$ to be a set of attributes of $R$, $S$ is a superkey iff $S \rightarrow R$ 
+
+2. \textbf{candidate key}: minimal superkey
+
+3. \textbf{prime attributes}: $e \in R$ such that $e$ appears in some candidate key of $R$ with $\Sigma$
+
+
+
+\textbf{Closure of FD}
+
+Let $\Sigma$ be a set of functional dependencies of a relation schema $R$. The closure $\Sigma^+$ is the set of all FDs logically entailed by the FDs in $\Sigma$
+
+\textbf{Closure of a subset given a $\Sigma$ / Attributes closure}
+
+Let $\Sigma$ be a set of functional dependencies of a relation schema $R$. The closure of $S \subseteq R$ denoted by $S^+$ is the set of all attributes functionally dependent on $S$.
+
+\textbf{Armstrong's axioms}
+
+Reflexivity: $\forall X \subseteq R, \ \forall Y \subseteq R,\ (Y \subseteq X) \implies (X \rightarrow Y)$
+
+Augmentation: $\forall X \subseteq R,\ \forall Y \subseteq R,\ ((X \rightarrow Y) \implies (X \cup Z \rightarrow Y \cup Z))$
+
+Transitivity: $\forall X \subseteq R,\ \forall Y \subseteq R,\ \forall Z \subseteq R,\ (X \rightarrow Y \wedge Y \rightarrow X) \implies (X \rightarrow Z)$
+
+\textbf{Algorithm for attribute closure}
+
+For each $X \rightarrow Y$, find $X \subseteq S$ ($S$ initialize to initial set), $S \leftarrow S \cup Y$, remove $X \rightarrow Y$ from the $\Sigma$
+
+\textbf{Equivalent functional dependencies}
+
+Two sets of FD $\Sigma_1$ and $\Sigma_2$ are equivalent iff they have the same closure. 
+
+\textbf{Minimal cover}
+
+1. RHS: minimal, singleton
+
+2. LHS: minimal. $X \rightarrow \{A\}$ does not exists $Y \rightarrow \{A\} \wedge Y \subset X$ $\rightarrow$ Check $(X - \{B\})^+$ with all FD $\Sigma$, if $\{A\}$ is in the closure.
+
+3. set itself: minimal, none of the FD can be derived from $\Sigma - FD$, $\Sigma'' = \Sigma - \{(X \rightarrow Y)\}$, find $X^+$ with $\Sigma''$, check $\{Y\} \subseteq X^+|_{\Sigma''}$
+
+\textbf{Canonical cover}
+Regrouping dependency in minimal cover that has the same LHS
+
+\subsection{BCNF}
+
+\textbf{Motivation} 
+
+Fail to enforce some functional dependencies on the current database $\Rightarrow$ May need to split databases
+
+Can resolve: update anomaly, deletion anomaly, insertion anomaly
+
+\textbf{Normal form}: recognize designs that enforce \textbf{functional dependencies} to protect data anomalies
+
+\textbf{Normalization}: translation of poor design to enforces FD
+
+\textbf{BCNF}: a relation $R$ with a set of FD $\Sigma$ is in \textit{BCNF} $\Leftrightarrow$ $\forall X \rightarrow \{A\} \in \Sigma^{+}$, $X \rightarrow \{A\}$ is trivial OR $X$ is a superkey  ($\forall (X \rightarrow \{A\}), (A\in X) \vee (X^{+}=R)$) 
+
+Alternative statement: \textbf{For every non-trivial functional dependency} X $\rightarrow$ Y in R,\textbf{X is a superkey} of R. 
+
+\textbf{Decomposition}: the process of breaking a relation into smaller relations so that each resulting relation satisfying BCNF,  the original FDs still be enforceable in the schema (\textbf{Dependency Preservation}) and the decomposition allow me to reconstruct the original relation (\textbf{Lossless Join})
+
+\textbf{Lossless-join} $\leftrightarrow$ natural join of fragments equals to initial table
+
+$(R\equiv(R_1 \cup R_2))
+\wedge ((R_1 \cap R_2 \rightarrow R_1) \vee (R_1 \cap R_2\rightarrow R_2))$
+
+Algorithms: attribute closure of $R1\cap R2$ with respect to $\Sigma$ is $R_{\cap}$. Check whether $R_1 \subseteq R_{\cap}^+$ \textbf{\underline{or}} $R_2 \subseteq R_{\cap}^+$
+
+A decomposition of \textit{R} into \textit{R}\textsubscript{1}, \textit{R}\textsubscript{2}, ..., \textit{R}\textsubscript{n} is \textit{lossless-join} if there exists at least one sequence of binary lossless-join decomposition that generates that decomposition $\rightarrow$ A sequence of Binary LL-join decomposition recursively split R will generate the sequence
+
+\textbf{Projected Functional Dependencies} : after decompose how does the FD look like?
+
+Consider a relation \textit{R} with a set of functional dependencies $\Sigma$. A set $\Sigma$' of \textit{projected functional dependencies} on \textit{R'} from \textit{R} with $\Sigma$, where \textit{R'} $\subseteq$ \textit{R}, is the set of functional dependencies such that
+
+for all \textit{X} $\rightarrow$ \textit{Y} $\in$ $\Sigma^{+}$, we have \textit{X} $\subseteq$ \textit{R'} and \textit{Y} $\subseteq$ \textit{R'}
+Given \textit{R'}, we may also denote the projection of $\Sigma$ on \textit{R'} by $\Sigma$|\textsubscript{\textit{R'}}.
+
+
+The \textbf{projection} $\Sigma|_{R'}$ is a subset of the \textbf{closure} $\Sigma^+$ (not necessarily just the original $\Sigma$) AND It includes \textbf{all FDs whose left-hand side and right-hand side are entirely contained in R'} (when applying the algorithm can ignore trivial FDs to get a simpler equivalent set)
+
+
+\textbf{Preservation}
+A decomposition of R with $\Sigma$ into $\delta = \{R_1, ..., R_n\}$ with the respective sets of functional dependencies $\Sigma|R_1, ..., \Sigma|R_n$ is dependency preserving if and only if
+
+$\Sigma^+ = (\Sigma|_{R_1} \cup ... \cup \Sigma|_{R_n})^+$
+
+\textbf{BCNF decomposition algorithm}
+
+$X \rightarrow Y$ violates BCNF, use $X \rightarrow Y$ to decompose R into $R_1 = X^+$ and $R_2 = (R - X^+)\cup X$, check respective set of projected FDs $\Sigma |_{R_1}$ and $\Sigma|_{R_2}$ are in BCNF. Otherwise, recursively continue the decomposition.
+
+The decomposition mentions earlier only guarantee \textbf{Lossless join} IT DOES NOT GURANTEE \textbf{dependency preservation}
+
+\subsection{Third Normal Form}
+Relax \textbf{BCNF} requirements for prime attributes:
+
+1. $X \rightarrow \{A\}$ is trivial
+
+2. $X$ is a superkey
+
+3. A is a prime attribute
+
+\textbf{3NF Synthesis (Berstein Algorithm)}
+
+When a relation is not in 3NF, synthesize a schema from minimal cover of the set of FD
+
+For each FD $X \rightarrow Y$ in the minimal cover, create a relation, unless it already exists or subsumed by another relation 
+
+Use canonical cover and subsumption to avoid unnecessary decomposition.
+
+If none of the keys has been subsumed, pick a candidate key.
+
+\textbf{Theorem}: the algorithm is guaranteed to be \textbf{\underline{lossless-join}}, \textbf{\underline{dependency-preserving}} decomposition in 3NF.
+
+\end{multicols}
+\end{document}
