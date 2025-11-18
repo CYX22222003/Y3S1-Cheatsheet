@@ -98,7 +98,7 @@ $\bigl[\text{Base: Reg}\bigr]\bigl[\text{Index: Reg, scale}\bigr]\bigl[\text{dis
 
 For indirect: if use as an operand, read the value from its memory $MEM[addr(ind)]$, if use in \textbf{leaq} Ind, DEST, $DEST \rightarrow addr(Ind)$ loads a pointer into DEST.
 
-\textbf{pushq} SRC $\rightarrow$ rsp $\leftarrow$ rsp - 8; Mem[rep] $\leftarrow$ SRC
+\textbf{pushq} SRC $\rightarrow$ rsp $\leftarrow$ rsp - 8; Mem[rsp] $\leftarrow$ SRC
 
 \textbf{popq} DEST $\rightarrow$ DEST $\rightarrow$ MEM[rsp]; rsp $\leftarrow$ rsp + 8
 
