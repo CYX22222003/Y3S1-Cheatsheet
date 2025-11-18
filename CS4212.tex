@@ -1,4 +1,4 @@
-\documentclass[10pt]{article}
+\documentclass[12pt]{article}
 \usepackage{multicol}
 \usepackage{calc}
 \usepackage{ifthen}
@@ -7,6 +7,8 @@
 \usepackage{color,graphicx,overpic}
 \usepackage{hyperref}
 \usepackage{listings}
+\usepackage{proof}
+
 \pdfinfo{
   /Title (CS4212 Cheatsheet)
   /Creator (TeX)
@@ -70,7 +72,7 @@
 \raggedright
 \scriptsize
 \begin{multicols}{3}
-\subsection{x86 machine instruction}
+\subsubsection{x86 machine instruction}
 
 % X86 schematic
 % \includegraphics[width=4.0cm, height=2.5cm]{images/compiler_x86_scheme.png}
@@ -147,9 +149,9 @@ For indirect: if use as an operand, read the value from its memory $MEM[addr(ind
 \textbf{Caller Protocol}
 Set up arguments: $rdi \rightarrow arg1;\, rsi \rightarrow arg2;\ rdx \rightarrow arg3;\ rcx \rightarrow arg4;\ r8 \rightarrow arg5;\ r9 \rightarrow arg6$
 
-Push arguments > 6 into stack from right to left: arg7 is higher at the stack (lower address) compared to arg8 (\underline{caller save})
+Push arguments $>$ 6 into stack from right to left: arg7 is higher at the stack (lower address) compared to arg8 (\underline{caller save})
 
-for n > 6, the nth argument is located at (((n-7)+2)*8)(rbp)
+for n $>$ 6, the nth argument is located at (((n-7)+2)*8)(rbp)
 
 
 \textbf{Call instruction} ($callq\ g$)
@@ -170,7 +172,7 @@ for n > 6, the nth argument is located at (((n-7)+2)*8)(rbp)
 4. Execute return instruction $\rightarrow$ pop stack refers to rip
 
 
-\subsection{LLVM intermediate representation}
+\subsubsection{LLVM intermediate representation}
 
 1. \textbf{Basic blocks and control flow}
 
@@ -211,16 +213,16 @@ Local variables: $\%uid$ (single static assignment invariant); global decls $@gi
 
 - bitcast: unsafe cast $\rightarrow$ may cause seg fault or corrupt memory
 
-\subsection{Lexing}
+\subsubsection{Lexing}
 
 1. \textbf{Regular Expression}
 $\epsilon$ Epsilon stands for the empty string
 
 ‘a’ - An ordinary character stands for itself
 
-R1 | R2 - choice of R1 or R2
+$R1 | R2$ - choice of R1 or R2
 
-R1 R2 - R1 followed by R2
+$R1 R2$ - R1 followed by R2
 
 R* - Kleene star, stands for zero or more repetitions of R
 
@@ -230,9 +232,9 @@ R* - Kleene star, stands for zero or more repetitions of R
 
 R+ - One or more repetitions of R, equivalent to RR*
 
-R? - Zero or one occurrences of R, equivalent to ($\epsilon$|R)
+R? - Zero or one occurrences of R, equivalent to ($\epsilon|R$)
 
-$\bigl['a'-'z'\bigr]$ - One of a or b or c or $\dots$ z, equivalent to (a|b|$\dots$|z)
+$\bigl['a'-'z'\bigr]$ - One of a or b or c or $\dots$ z, equivalent to ($a|b|\dots|z$)
 
 \verb|[^'0'-'9']| - Any character except 0 through 9
 
@@ -246,92 +248,280 @@ For each regular expression on token, attach action $A_i$ which will be run when
 
 RE $\rightarrow$ NFA:
 
-\includegraphics[width=7cm, height=3.5cm]{images/compiler_RE_NFA.png}
-
-\includegraphics[width=7cm, height=3.5cm]{images/compiler_RE_NFA2.png}
+\includegraphics[width=4cm, height=2cm]{images/compiler_RE_NFA.png}
+\includegraphics[width=4cm, height=2cm]{images/compiler_RE_NFA2.png}
 
 4. \textbf{DFA}: Action of the automaton for each input is fully determined
 
-\subsection{Parsing}
+\subsubsection{Parsing}
 
 1. \textbf{Syntax Analysis and Context Free Grammar}
 
+CFG: terminals, non-terminals, productions
+
 2. \textbf{CFG derivation and Parse tree}
+
+CFG accepts a string iff there is a derivation from start symbol $\rightarrow$ Derivation: choose nonterminal and replace with RHS until string contains only terminals (top down); choose matching RHS and reduce to LHS until the topmost nonterminal (bottom up)
+
+Parse tree: tree derivation of the terminals
 
 3. \textbf{General Parsing Issues}:
 
-- Associativity
+- Associativity: left/right recursive
 
-- Ambiguity
+- Ambiguity: same set of string but two set of derivation
 
-- Precedence
+- Precedence: adding nonterminals and allow recursion on one side, the higher precedence farther from the start symbol.
 
 4. \textbf{LL(1) Grammar}
 
+decide which production to apply based on the look-ahead symbol. Parsed “top-down” with only a single lookahead symbol.
+
+- How to do so? "Left-factor" the grammar. There is a common S prefix for each
+choice, so add a new non-terminal S’ at the decision point; eliminate left recursion
+
+- Parse table: nonterminal $\times$ input token $\rightarrow$ production to apply 
+
+- How to construct parse table?
+
+A. for a production $A \rightarrow \gamma$
+
+B. set of all input tokens appearing first in strings that can be derived from $\gamma$ $\rightarrow$ Add the production $\rightarrow \gamma$ to the entry (A, token)
+
+C. if $\gamma$ can derive $\epsilon$, construct set of all input tokens that follow non-terminal A, add $\rightarrow \epsilon$ to (A, token)
+
+
 5. \textbf{LR(0) Grammar}
+
+“Shift-Reduce” parsers: Work bottom up instead of top down; Construct right-most derivation of a program in the grammar; Better error detection/recovery
+
+Parser state: Stack of terminals and nonterminals; Unconsumed input is a string of terminals; Current derivation step is stack + input
+
+Parsing is a sequence of shift and reduce operations:
+
+- Shift: move look-ahead token to the stack
+
+- Reduce: Replace symbols $\gamma$ at top of stack with nonterminal X
+such that X $\rightarrow \gamma$ is a production. (pop $\gamma$, push X)
+
+Constructing DFA for LR(0)
+
+A. \underline{State} is set of item keep track of progress on possible upcoming reductions and \underline{item} is the production with separator "." separate on stack and might be seen later items
+
+B. \underline{Closure}: productions that can be applicable with the already observed stack. Adds items for all productions whose LHS nonterminal occurs in an item in the state just after the ‘.’
+
+C. \underline{Add transition}: outgoing edge with terminals and nonterminals that can appear directly after "." in the source state. The target state simulate the shifting of the item by advancing the "."
+
+D. Reduce state: "." at the end of the production
+
+E. How to run?
+
+Run the parser stack through the DFA.
+
+* The resulting state tells us which productions might be reduced next.
+
+– If not in a reduce state, then shift the next symbol and transition according to DFA.
+
+– If in a reduce state, X $\rightarrow$ $\gamma$ with stack $\alpha\gamma$, pop $\gamma$ and push X.
+
+* Optimisation: No need to re-run the DFA from beginning every step
+
+– Store the state with each symbol on the stack: e.g. 1(3(3L5)6
+
+– On a reduction X $\rightarrow \gamma$, pop stack to reveal the state too:
+e.g. From stack 1(3(3L5)6 reduce S $\rightarrow$ ( L ) to reach stack 1(3
+
+– Next, push the reduction symbol: e.g. to reach stack 1(3S
+
+– Then take just one step in the DFA to find next state: 1(3S
+
+F. Represent using the parsing table $state \times (terminals + nonterminals)$
+
+Entries are 1) shift and goto state n, 2) Reduce using reduction $X \rightarrow \gamma$
+
+G. limitations: \textbf{States with reduce actions have a single reduce action} $\implies$ More complex grammar will cause shift/reduce and reduce/reduce confict $\implies$ Can resolve by using look-ahead symbol
 
 6. \textbf{Parsing conflict}
 
-\subsection{Lambda Calculus}
+Precedence and Associativity Declarations: menhir often support precedence and associativity declarations
+
+Ambiguity in if-then-else: use $\{\}$
+
+\subsubsection{Lambda Calculus}
 
 1. \textbf{Untyped Lambda Calculus Syntax}
 
-2. \textbf{Free Variables and Scoping}
+\begin{lstlisting}[language=ml]
+    type exp = 
+    | Var of var
+    | Fun of var * exp
+    | App of exp * exp
+\end{lstlisting}
 
-3. \textbf{Values and Substitution}
+2. \textbf{Free Variables and Scoping}: fv defined in outer scope. Non-free are bound. Terms with no free vars is closed, term with at least one free is open
+
+3. \textbf{Values and Substitution}: $e\{v/x\}$ - replace free occurence of x in e by v
 
 4. \textbf{Operational Semantics}
+$x\{v/x\} = v;\
+y\{v/x\} = y;\
+(fun\ x \rightarrow exp)\{v/x\} = (fun x \rightarrow exp)\
+(fun\ y \rightarrow exp)\{v/x\} = (fun y \rightarrow exp\{v/x\})\
+(e1 e2)\{v/x\} = (e1\{v/x\} e2\{v/x\})$
 
 5. \textbf{Free Variable Calculation and Variable Capture}
 
-\subsection{Semantic Analysis - Type Checking}
+Free variable calculation:
+
+$fv(x) = \{x\};\
+fv(fun\ x \rightarrow exp) = fv(exp) - \{x\};\
+fv(exp1, exp2)= fv(exp1) \cup fv(exp2)$
+
+Variable Capture: Substitution causes bound vars capture free vars $\rightarrow$ Solved by alpha equivalence
+
+\subsubsection{Semantic Analysis - Type Checking}
 
 1. \textbf{Variable Scoping}
 
-2. \textbf{Semantic Analysis and symbol table}
+- semantic analysis: resolve symbol occurences to declarations/binders
+
+- Type-check AST
+
+- Scope checking: given $G$, a set of variable identifiers, $e$ lambda term, Judgement: $G \vdash e \implies fv(e) \subseteq G$  
+
+2. \textbf{Symbol table}: mapping from symbol to information about these symbols (types, location in the source text)
 
 3. \textbf{Type and type system}
 
-4. \textbf{Type safety}
+- A system of \underline{judgments} and \underline{inference rules}
+
+- Inference rule \[
+    \infer{J}{J_1 & J_2 \dots & J_n}
+    \quad\text{(side condition)}
+    \]
+
+- Type judgment: $G \vdash e : t$ ($G$ maps variable to types. Under type environment $G$, the expression $e$ has a type $t$)
+
+- Derivation or proof tree $\rightarrow$ judgments as nodes and edges connect premises to conclusions. Leaves are axioms $\implies$ type checker to verify such a tree exists
+
+4. \textbf{Type safety}: 
+
+Well-typed programs cannot "go wrong" by trying to execute undefined code, If $\vdash e : t$ then there exists a value v such that $e \Downarrow v$.
+
+If $\vdash P : t$ is a well-typed program, then either: (a) the program terminates in a well-defined way (throw exception OR halt with return vals), or (b) the program continues computing forever
 
 5. \textbf{Well-formed types}
 
-6. \textbf{Type-checking statement}
+- Language with type definitions, need additional rules to define well-formed types.
 
-7. \textbf{Subtyping and upper bounds}
+- Judgment take the form $H \vdash t$; $H$ is the set of type names; $t$ is a type; $H \vdash t \Leftrightarrow$ $H$ lists all well-formed type, $t$ is a well-formed type
 
-\subsection{Code optimization}
+- Judgment: $H, G, rt \vdash s$
 
-1. \textbf{Constant folding}
+6. \textbf{Subtyping and upper bounds}
 
-2. \textbf{Copy propagation}
+A type is just a predicate on the set of values in a system, i.e. subsets of all values.
 
-3. \textbf{Dead Code Elimination}
+Subtype relationship $A <: B \implies \left[A\right] \subseteq \left[B\right]$
 
-4. \textbf{Unreachable/Dead Code}
+Subtyping for Function Types:
 
-5. \textbf{Inlining}
+$\infer{(T_1 \rightarrow T_2) <: (S_1 \rightarrow S_2)}{S_1 <: T_1 & T_2 <: S2}$
 
-6. \textbf{Loop Invariant Code Motion}
+Subtyping for record: depth subtyping + width subtyping
 
-7. \textbf{Strength Reduction}
+Subtyping and reference: unsound for both covariant and contravariant
 
-9. \textbf{Loop Unrolling}
+\subsubsection{Code optimization}
 
-9. \textbf{Code Specialization}
+\textbf{Constant folding}
 
-10. \textbf{Common Subexpression Elimination}
+If operands are known at compile time, perform the operation statically. Constant expressions can be created by translation or earlier optimizations
 
-11. \textbf{Liveness Analysis}
+\textbf{constant propagation}
 
-12. \textbf{Reaching Definition Analysis}
+If the value is known to be a constant, replace the use of the variable by the constant. Value of the variable must be propagated forward from the point of assignment.
 
-13. \textbf{Available Expressions Analysis}
+\textbf{Copy propagation}
 
-14. \textbf{General Dataflow Analysis Framework}
+If one variable is assigned to another, replace uses of the assigned variable with the copied variable. 
 
-15. \textbf{Register Allocation Algorithm}
+\textbf{Dead Code Elimination}
 
+If a side-effect free statement can never be observed, it is safe to eliminate the statement. A variable is dead if it is never used after it is defined.
+
+\textbf{Unreachable/Dead Code}
+
+Unreachable: basic blocks not reachable by any trace leading from the starting basic block are unreachable and can be deleted.
+
+Dead: code for computing the value can be dropped. only if it’s pure, i.e. it has no externally visible side effects (raise exception, modify global variables, infinite loop, read/write IO)
+
+\textbf{Inlining}
+
+Replace a call with the body of the function itself with arguments rewritten to be local variables
+
+\textbf{Loop Invariant Code Motion}
+
+If the result of a statement or expression does not change during the loop and it’s pure, it can be hoisted outside the loop body.
+
+\textbf{Strength Reduction}
+
+replace expensive operations (multiplies, divides) by cheap ones (adds and subtracts)
+
+\textbf{Loop Unrolling}
+
+for (int i=0; i $<$ n; i++) { S } to for (int i=0; i $<$ n-3; i+=4) {S;S;S;S};for (; i $<$ n; i++) { S }
+
+With k unrollings, eliminates (k-1)/k conditional branches
+
+\textbf{Code Specialization}
+
+create specialized versions of a function that is called from different places with different arguments.
+
+\textbf{Common Subexpression Elimination}
+
+Common subexpression elimination removes the redundant computation by folding them together. Must be sure that the shared expression always has the same value in both places
+
+\textbf{Liveness Analysis} \& \textbf{Reaching Definition Analysis} \& \textbf{Available Expressions Analysis}
+
+\includegraphics[width=4cm, height=2cm]{images/liveness_analysis.png}
+\includegraphics[width=4cm, height=2cm]{images/reaching_def.png}
+\includegraphics[width=4cm, height=2cm]{images/available_exp.png}
+\includegraphics[width=4cm, height=2cm]{images/worklist_algo.png}
+
+\textbf{General Dataflow Analysis Framework}
+
+$\mathcal{L}$ is a partial order defined by partial order $\sqsubseteq$
+
+Meet: $\sqcap$ the greatest lower bound; Join: $\sqcup$ the lowest upper bound
+
+Partial order with all meets and joins is a \textbf{lattice}
+
+\includegraphics[width=4cm, height=2cm]{images/generic_iterative_analysis.png}
+
+\textbf{Register Allocation Algorithm}
+
+Linear scan: sweep the program top-down, allocating registers for live variables and evicting non-live ones.
+
+\textbf{Graph coloring}
+
+interference graph: Edges connect variables that interfere with each other
+
+Step 1: Find a node with degree $<$ K and cut it out of the graph.
+
+– Remove the nodes and edges.
+
+– This is called simplifying the graph
+
+Step 2: Recursively K-color the remaining subgraph
+
+Step 3: When remaining graph is colored, there must be at least one free color available for the deleted node (since its degree was $<$ K). Pick such a color.
+
+If we can't K-colour the graph, spill (heuristics: used frequently; deeply nested loop; high interference). Sometimes it is possible to colour a node marked for spilling.
+
+Precoloured node: Some variables must be pre-assigned to registers. To properly allocate temporaries, we treat registers as nodes in the interference graph with pre-assigned colours. Those nodes can never be removed
+
+Coalescing interference graph: coalesce nodes connected by move-related edges
 
 \end{multicols}
 \end{document}
