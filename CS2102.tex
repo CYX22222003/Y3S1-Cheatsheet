@@ -244,6 +244,23 @@ with CTE_NAME AS (
 9. Views
 virtual tables, only parts of a table are of interested; permanently named query, can be used like normal tables, result of query is not permanently stored
 
+\subsection{DB Design}
+
+\textbf{ERD}
+
+\underline{entity}: objects; \underline{entity set}: collection of objects; \underline{attribute}: information describing an entity; \underline{key attribute}: uniquely identify each entity; \underline{derived attribute}: derived from other attributes; composite attributes, multivalued attribute;
+
+\underline{relationship and relationship set}: collection of tuples of object of same types
+
+\textbf{cardinality and participation constraint}
+
+\underline{Cardinality}: many to many, many to one, one to one
+
+\underline{Participation}: limitation of basic cardinality constraint
+
+\underline{Dependency constraint}: entity set \textit{does not} have its own key. It can only be uniquely identified by considering the primary key of the \textit{owner entity}
+
+\underline{Aggregation}: treats relationships as higher-level entities.
 
 \subsection{Relation Algebra}
 
@@ -332,6 +349,14 @@ Sources: some cols \textbf{uniquely determined} by other cols
 $r$ of schema $R$ satisfies the functional dependencies $\sigma: X \rightarrow Y$ with $X \subseteq R \wedge Y \subseteq R  \Leftrightarrow $ ($r \text{ agrees on } X \implies r \text{ agrees on } Y)$  
 
 Set Functional Dependencies: $r$ satisfies all $\sigma \in \Sigma$ of $R$
+
+\textbf{ERD mapping with FDs}
+
+1. Key attributes functionally determine the rest of the attributes.
+
+2. Entity set participating with a (0,1) or (1,1) constraint functionally determines the attributes of the relationship set and the attributes of the other participating entity set. An exception is (1,1) from weak entity set.
+
+3. If all of the entity sets are participating with (0,n) or (1,n) constraint, their combined key attributes determine the attributes of the relationship set.
 
 \textbf{Triviality}:
 
