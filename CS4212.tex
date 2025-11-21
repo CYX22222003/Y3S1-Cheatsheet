@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 \usepackage{multicol}
 \usepackage{calc}
 \usepackage{ifthen}
@@ -72,7 +72,7 @@
 \raggedright
 \scriptsize
 \begin{multicols}{3}
-\subsubsection{x86 machine instruction}
+\textbf{\underline{x86 machine instruction}}
 
 % X86 schematic
 % \includegraphics[width=4.0cm, height=2.5cm]{images/compiler_x86_scheme.png}
@@ -108,17 +108,7 @@ For indirect: if use as an operand, read the value from its memory $MEM[addr(ind
 
 \textbf{Conditional Code}:
 
-- $eq$: ZF is set
-
-- $neq$: not ZF
-
-- $lt$: SF $\neq$ OF $(SF \wedge \neg OF) \vee (\neg SF \wedge OF)$ 
-
-- $ge$: not $IT$ HOLDS $\implies$ $SF \equiv OF$
-
-- $le$: $lt$ OR ZF
-
-- $gt$: Not $le$
+$eq$: ZF is set; $neq$: not ZF; $lt$: SF $\neq$ OF $(SF \wedge \neg OF) \vee (\neg SF \wedge OF)$ ; $ge$: not $IT$ HOLDS $\implies$ $SF \equiv OF$; $le$: $lt$ OR ZF; $gt$: Not $le$
 
 5. \textbf{Conditional Instructions}:
 
@@ -138,10 +128,8 @@ For indirect: if use as an operand, read the value from its memory $MEM[addr(ind
 
 7. \textbf{C Memory Model}
 
-\underline{code \& data}: compiled code, constant string
-
-\underline{heap}: dynamically allocated objects, allocated via "malloc"
-
+\underline{code \& data}: compiled code, constant string;
+\underline{heap}: dynamically allocated objects, allocated via "malloc";
 \underline{stack}: stores local variables, stores the return address of the function
 
 8. \textbf{Calling convention}
@@ -172,16 +160,14 @@ for n $>$ 6, the nth argument is located at (((n-7)+2)*8)(rbp)
 4. Execute return instruction $\rightarrow$ pop stack refers to rip
 
 
-\subsubsection{LLVM intermediate representation}
+\textbf{\underline{LLVM intermediate representation}}
 
 1. \textbf{Basic blocks and control flow}
 
 \begin{lstlisting}[language=ml]
     type block = {
         insns: (uid * insn) list;
-        term: (uid * terminator)
-    }
-
+        term: (uid * terminator) }
     type cfg = block * (lbl * block) list
 \end{lstlisting}
 
@@ -213,7 +199,7 @@ Local variables: $\%uid$ (single static assignment invariant); global decls $@gi
 
 - bitcast: unsafe cast $\rightarrow$ may cause seg fault or corrupt memory
 
-\subsubsection{Lexing}
+\textbf{\underline{Lexing}}
 
 1. \textbf{Regular Expression}
 $\epsilon$ Epsilon stands for the empty string
@@ -253,7 +239,7 @@ RE $\rightarrow$ NFA:
 
 4. \textbf{DFA}: Action of the automaton for each input is fully determined
 
-\subsubsection{Parsing}
+\textbf{\underline{Parsing}}
 
 1. \textbf{Syntax Analysis and Context Free Grammar}
 
@@ -291,11 +277,11 @@ B. set of all input tokens appearing first in strings that can be derived from $
 C. if $\gamma$ can derive $\epsilon$, construct set of all input tokens that follow non-terminal A, add $\rightarrow \epsilon$ to (A, token)
 
 
-5. \textbf{LR(0) Grammar}
+5. \textbf{LR grammar \& Shift-reduce Parsing}
 
 “Shift-Reduce” parsers: Work bottom up instead of top down; Construct right-most derivation of a program in the grammar; Better error detection/recovery
 
-Parser state: Stack of terminals and nonterminals; Unconsumed input is a string of terminals; Current derivation step is stack + input
+LR Parser state: Stack of terminals and nonterminals; Unconsumed input is a string of terminals; Current derivation step is stack + input
 
 Parsing is a sequence of shift and reduce operations:
 
@@ -304,7 +290,7 @@ Parsing is a sequence of shift and reduce operations:
 - Reduce: Replace symbols $\gamma$ at top of stack with nonterminal X
 such that X $\rightarrow \gamma$ is a production. (pop $\gamma$, push X)
 
-Constructing DFA for LR(0)
+\underline{Constructing DFA for shift-reduce Parser states}
 
 A. \underline{State} is set of item keep track of progress on possible upcoming reductions and \underline{item} is the production with separator "." separate on stack and might be seen later items
 
@@ -339,7 +325,7 @@ F. Represent using the parsing table $state \times (terminals + nonterminals)$
 
 Entries are 1) shift and goto state n, 2) Reduce using reduction $X \rightarrow \gamma$
 
-G. limitations: \textbf{States with reduce actions have a single reduce action} $\implies$ More complex grammar will cause shift/reduce and reduce/reduce confict $\implies$ Can resolve by using look-ahead symbol
+G. LR(0) limitations: \textbf{States with reduce actions have a single reduce action} $\implies$ More complex grammar will cause shift/reduce and reduce/reduce conflict $\implies$ Can resolve by using look-ahead symbol
 
 6. \textbf{Parsing conflict}
 
@@ -347,14 +333,16 @@ Precedence and Associativity Declarations: menhir often support precedence and a
 
 Ambiguity in if-then-else: use $\{\}$
 
-\subsubsection{Lambda Calculus}
+Conflicts during shift-reduce parsing: 
 
-1. \textbf{Untyped Lambda Calculus Syntax}
+the parser knows the entire stack contents and the next input token, cannot decide whether to shift or to reduce (\underline{shift/reduce}) OR cannot decide which reduction to make (\underline{reduce/reduce}) $\rightarrow$ Technically, this grammar are not in LR(k)
 
+
+\textbf{\underline{Lambda Calculus}}
+
+1. \textbf{Untyped Lambda Calculus Syntax} 
 \begin{lstlisting}[language=ml]
-    type exp = 
-    | Var of var
-    | Fun of var * exp
+    type exp = | Var of var | Fun of var * exp 
     | App of exp * exp
 \end{lstlisting}
 
@@ -379,7 +367,7 @@ fv(exp1, exp2)= fv(exp1) \cup fv(exp2)$
 
 Variable Capture: Substitution causes bound vars capture free vars $\rightarrow$ Solved by alpha equivalence
 
-\subsubsection{Semantic Analysis - Type Checking}
+\textbf{\underline{Semantic Analysis - Type Checking}}
 
 1. \textbf{Variable Scoping}
 
@@ -395,10 +383,10 @@ Variable Capture: Substitution causes bound vars capture free vars $\rightarrow$
 
 - A system of \underline{judgments} and \underline{inference rules}
 
-- Inference rule \[
-    \infer{J}{J_1 & J_2 \dots & J_n}
-    \quad\text{(side condition)}
-    \]
+% - Inference rule \[
+%     \infer{J}{J_1 & J_2 \dots & J_n}
+%     \quad\text{(side condition)}
+%     \]
 
 - Type judgment: $G \vdash e : t$ ($G$ maps variable to types. Under type environment $G$, the expression $e$ has a type $t$)
 
@@ -432,7 +420,7 @@ Subtyping for record: depth subtyping + width subtyping
 
 Subtyping and reference: unsound for both covariant and contravariant
 
-\subsubsection{Code optimization}
+\textbf{\underline{Code optimization}}
 
 \textbf{Constant folding}
 
@@ -482,12 +470,42 @@ create specialized versions of a function that is called from different places w
 
 Common subexpression elimination removes the redundant computation by folding them together. Must be sure that the shared expression always has the same value in both places
 
-\textbf{Liveness Analysis} \& \textbf{Reaching Definition Analysis} \& \textbf{Available Expressions Analysis}
+\textbf{Liveness Analysis}
 
-\includegraphics[width=4cm, height=2cm]{images/liveness_analysis.png}
-\includegraphics[width=4cm, height=2cm]{images/reaching_def.png}
-\includegraphics[width=4cm, height=2cm]{images/available_exp.png}
-\includegraphics[width=4cm, height=2cm]{images/worklist_algo.png}
+Domain: set of variables
+
+$use[n]$, $def[n]$, $in[n]$, $out[n]$
+
+$F_n(out[n]) = use[n] - (out[n] - def[n])$
+
+\textbf{Reaching Definition Analysis}
+
+Domain: set of nodes
+
+$def[a]$ - set of all nodes defined $a$; 
+
+$gen[n] \equiv a = b\ op\ c\ |\ a = load\ b \rightarrow \{n\}$
+
+$kill[n] \equiv a = load\ b\ |\ a = b\ op\ b\ |\ a = f(b_1, \dots, b_n) \rightarrow def[a] - {n}$
+
+$F_n(in[n]) = gen[n] \cup (in[n] - kill[n])$
+
+\textbf{Available Expressions Analysis}
+
+Domain: set of nodes
+
+$use[a]$ set of nodes that used $a$ in there expression
+
+$gen[n] \equiv a = b\ op\ c\ |\ a = load\ b \rightarrow \{n\} - kill[n]$
+
+$kill[n] \equiv a = b\ op\ c \rightarrow uses[a]; a=load\ b \rightarrow uses[a]; store\ b, a \rightarrow uses[[x]],\forall x \text{ may equal a}; a = f(b_1, \dots b_n) \rightarrow uses[a] \cup uses[[x]] \forall x \text{ may equal to b}; f(b_1, \dots, b_n) \rightarrow uses[[x]]$ 
+
+$F_n(in[n]) = gen[n] \cup (in[n] - kill[n])$
+
+% \includegraphics[width=4cm, height=2cm]{images/liveness_analysis.png}
+% \includegraphics[width=4cm, height=2cm]{images/reaching_def.png}
+% \includegraphics[width=4cm, height=2cm]{images/available_exp.png}
+\includegraphics[width=7cm, height=2.5cm]{images/worklist_algo.png}
 
 \textbf{General Dataflow Analysis Framework}
 
@@ -497,7 +515,19 @@ Meet: $\sqcap$ the greatest lower bound; Join: $\sqcup$ the lowest upper bound
 
 Partial order with all meets and joins is a \textbf{lattice}
 
-\includegraphics[width=4cm, height=2cm]{images/generic_iterative_analysis.png}
+\textbf{Forward dataflow analysis}
+
+- control flow constraint: $in[n] = \sqcap_{n'\in pred[n]}out[n']$
+
+- transfer constraint: $out[n] = F_n(in[n])$
+
+\textbf{Backward dataflow analysis}
+
+- control flow constraint: $out[n] = \sqcap_{n'\in succ[n]}in[n']$
+
+- transfer constraint: $in[n] = F_n(out[n])$
+
+\includegraphics[width=8cm, height=3.5cm]{images/generic_iterative_analysis.png}
 
 \textbf{Register Allocation Algorithm}
 

@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[10pt]{article}
 \usepackage{multicol}
 \usepackage{calc}
 \usepackage{ifthen}
@@ -97,124 +97,83 @@
 \subsection{SQL}
 1. \textbf{SELECT} statement
 
-Basic form:
-\begin{lstlisting}[language=SQL]
-    SELECT [DISTINCT] target-list
-    FROM relation-list
-    [WHERE conditions]
-\end{lstlisting}
+Basic form: SELECT [DISTINCT] target-list FROM relation-list [WHERE conditions]
 
 Additional Constructs: 
 
 1) Wildcard for all attributes; 
-
 2) expr \textbf{BETWEEN} (lower) \textbf{AND} (upper); 
-
-3) String concatenation - stringA || stringB; 
-
+3) String concatenation - stringA $||$ stringB; 
 4) AS for rename; 
-
 5) DISTINCT toe eliminate duplicates; 
-
-6) IS NULL/IS NOT NULL (arithmic on NULL return NULL, comparison return UNKNOWN)
-
+6) IS NULL/IS NOT NULL (arithmic on NULL return NULL, comparison return UNKNOWN); 
 7) Pattern matching: "\_" matches single character, "\%" matches any sequence of 0 or more characters
 
 2. Set operations
 
-Union-compatible: same number of columns, same order of data types
-
+Union-compatible: same number of columns, same order of data types; 
 Queries: UNION, INTERSECT, EXCEPT, UNION ALL, INTERSECT ALL, EXCEPT ALL
 
 
 3. Join Operations
 
-1) JOIN = cross product + attribute selection
-
-2) NATURAL JOIN: automatically combines two tables by matching rows based on columns with the same name and compatible data types
-
-- join conditions implied by attribute names
-
-- defined for equality comparisons
-
-- one instance of matching attributes
-
+1) JOIN = cross product + attribute selection;
+2) NATURAL JOIN: automatically combines two tables by matching rows based on columns with the same name and compatible data types;
 3) OUTER JOIN: INNER JOIN + all remaining from left/right/both tables
 
 4. Subqueries
 
-1) IN/ NOT IN: expr IN/NOT IN (subquery)
-
-- subquery must return exactly one column
-
-- IN returns true if expr matches any row
-
-- NOT IN the other way round
-
-2) ANY/SOME
-
-- expr op ANY(subquery)
-
-- must return exactly one column, expr is compared to each subquery row using op
-
-- ANY returns TRUE if comparision evaluates to TRUE for at least one subquery row
+1) IN/ NOT IN: expr IN/NOT IN (subquery): subquery must return exactly one column; IN returns true if expr matches any row; NOT IN the other way round;
+2) ANY/SOME: 
+expr op ANY(subquery);
+must return exactly one column, expr is compared to each subquery row using op;
+ANY returns TRUE if comparision evaluates to TRUE for at least one subquery row
 
 3) ALL queries
-- if comparison is true for all
+if comparison is true for all
 
 4) Correlated subqueries
-- subquery uses value from outer query
+subquery uses value from outer query; 
+result of subquery depends on outer query
 
-- result of subquery depends on outer query
+5) Exists: 
+EXISTS(subquery) returns true if subquery returns at least one tuple
 
-5) Exists
+6) Scalar Subqueries: 
+return a single value one row one column; 
+can be used as an expression in queries
 
-- EXISTS(subquery) returns true if subquery returns at least one tuple
+7) ROW construtor: 
+Previous subqueries can have more than one attribute/column;
+row constructor need to match
 
-6) Scalar Subqueries
-- return a single value one row one column
-- can be used as an expression in queries
+5. Sorting and ranked-based selection: 
+ORDER BY;
+LIMIT;
+OFFSET: specify the position of first target to be considered
 
-7) ROW construtor
-- Previous subqueries can have more than one attribute/column
-- row constructor need to match
-
-5. Sorting and ranked-based selection
-- ORDER BY
-- LIMIT
-- OFFSET: specify the position of first target to be considered
-
-6. Aggregation
-- MIN, MAX, AVG, COUNT, SUM
+6. Aggregation:
+MIN, MAX, AVG, COUNT, SUM
 
 - Interpretation of NULL values
 
-1) Non-empty relation with attribute A -> ignore, only non-null will be considered
-
-2) empty relation , count will return 0 and the rest will be null
-
+1) Non-empty relation with attribute A -> ignore, only non-null will be considered; 
+2) empty relation , count will return 0 and the rest will be null; 
 3) non-empty with only null, count will return 0 but count(*) may return n, the rest null
 
-7. Grouping
+7. Grouping: 
+GROUP BY;
+logical partition of relations/tuples into groups based on values of a specific attributes; application of aggregation over each group;
 
+Column $A_{i}$ appears in SELECT clause: 
+- $A_i$ in GROUP BY;
+- $A_i$ as input of aggregation function;
+- PK of R appears in GROUP BY;
 
-GROUP BY
-
-logical partition of relations/tuples into groups based on values of a specific attributes; application of aggregation over each group
-
-Column $A_{i}$ appears in SELECT clause
-- $A_i$ in GROUP BY
-- $A_i$ as input of aggregation function
-- PK of R appears in GROUP BY
-
-
-HAVING
-
-- conditions check for each group defined by GROUP BY clause
-
+HAVING:
+conditions check for each group defined by GROUP BY clause
 
 Conceptual evaluation order:
-
 FROM $\rightarrow$ WHERE $\rightarrow$ GROUP BY $\rightarrow$ HAVING $\rightarrow$ SELECT $\rightarrow$ ORDER BY $\rightarrow$ LIMIT/OFFSET
 
 8. Expressions
@@ -261,6 +220,12 @@ virtual tables, only parts of a table are of interested; permanently named query
 \underline{Dependency constraint}: entity set \textit{does not} have its own key. It can only be uniquely identified by considering the primary key of the \textit{owner entity}
 
 \underline{Aggregation}: treats relationships as higher-level entities.
+
+\includegraphics[width=4cm, height=4cm]{images/many_to_many.png}
+\includegraphics[width=4cm, height=4cm]{images/many_to_one.png}
+
+\includegraphics[width=4cm, height=4cm]{images/one_to_one.png}
+\includegraphics[width=4cm, height=4cm]{images/weak_entity_set.png}
 
 \subsection{Relation Algebra}
 
@@ -322,19 +287,42 @@ Trigger: check if event occur. Binds \underline{trigger function} to operations 
 
 Note: must return a trigger; checks for insert or update statement for table downloads; inconsistent rows throw exception and effect will be rolled back
 
+\textbf{Timings}
+
+\verb|BEFORE| trigger is executed before the event. May modify/cancel the event by using \textit{return value}.
+
+\verb|AFTER| trigger is executed after the event. The event already occurred, cancellation done using \verb|EXCEPTION|.
+
+
 \textbf{OLD and NEW}
 
 \textbf{NEW (OLD)} refers to the what the row like \textbf{after (before)} the operation
 
 \includegraphics[width=7cm, height=3.5cm]{images/trigger_view_syntax.png}
 
+\verb|INSERT|: new value (\verb|NEW|)
+
+\verb|UPDATE|: old value (\verb|OLD|) \& new value (\verb|NEW|)
+
+\verb|DELETE|: old value (\verb|OLD|)
+ 
+\textbf{Conditions}
+
 \includegraphics[width=7cm, height=2cm]{images/trigger_when.png}
 
 NO SELECT IN WHEN; NO OLD IN WHEN FOR insert; NO NEW in WHEN for delete; NO WHEN FOR INSTEAD OF
 
+\textbf{Granularity: FOR EACH ROW, FOR EACH STATEMENT}
+
+Some checks may only need to be done once regardless of how many rows are affected.
+
+Return value has no effect on the subsequent operations. Cancellation has to be done using EXCEPTION for statement-level.
+
 Trigger granularity: row-level trigger executes function for each tuple; statement-level trigger execute trigger function once per statement
 
 \includegraphics[width=7cm, height=2cm]{images/trigger_granularity.png}
+
+\textbf{Deferment}
 
 \subsection{Functional dependencies}
 
