@@ -114,7 +114,6 @@ Additional Constructs:
 Union-compatible: same number of columns, same order of data types; 
 Queries: UNION, INTERSECT, EXCEPT, UNION ALL, INTERSECT ALL, EXCEPT ALL
 
-
 3. Join Operations
 
 1) JOIN = cross product + attribute selection;
@@ -207,9 +206,9 @@ virtual tables, only parts of a table are of interested; permanently named query
 
 \textbf{ERD}
 
-\underline{entity}: objects; \underline{entity set}: collection of objects; \underline{attribute}: information describing an entity; \underline{key attribute}: uniquely identify each entity; \underline{derived attribute}: derived from other attributes; composite attributes, multivalued attribute;
+\underline{entity}: objects; \underline{entity set}: collection of objects; \underline{attribute}: information describing an entity; \underline{key attribute}: uniquely identify each entity; \underline{derived attribute}: derived from other attributes; composite attributes, multivalued attribute; Union of all PKs of its participating set is the \underline{superkey}
 
-\underline{relationship and relationship set}: collection of tuples of object of same types
+\underline{relationship and relationship set}: collection of tuples of object of same types, representing association among several attributes. $E_1$, $E_2$, ... $E_n$ participates in relationship set R. May contains descriptive attributes
 
 \textbf{cardinality and participation constraint}
 
@@ -221,11 +220,12 @@ virtual tables, only parts of a table are of interested; permanently named query
 
 \underline{Aggregation}: treats relationships as higher-level entities.
 
-\includegraphics[width=4cm, height=4cm]{images/many_to_many.png}
-\includegraphics[width=4cm, height=4cm]{images/many_to_one.png}
-
-\includegraphics[width=4cm, height=4cm]{images/one_to_one.png}
-\includegraphics[width=4cm, height=4cm]{images/weak_entity_set.png}
+\includegraphics[width=4cm, height=3.5cm]{images/many_to_many.png}
+\includegraphics[width=4cm, height=3.5cm]{images/many_to_one.png}
+\includegraphics[width=4cm, height=3.55cm]{images/many_to_one2.png}
+\includegraphics[width=4cm, height=3.5cm]{images/one_to_one.png}
+\includegraphics[width=4cm, height=3.5cm]{images/weak_entity_set.png}
+Use NOT NULL to ensure participation constraint
 
 \subsection{Relation Algebra}
 
@@ -235,7 +235,7 @@ virtual tables, only parts of a table are of interested; permanently named query
 
 \textbf{Selection}: $\sigma_c(R)$ all tuples that satisfy the selection condition $c$
 
-\textbf{Projection}: $\pi_l(R)$ projects all attributes of a relation specified in list $l$, duplicates tuples are removed from output
+\textbf{Projection}: $\pi_l(R)$ projects all attributes of a relation specified in list $l$, \underline{duplicates tuples are removed from output} as relation is a set
 
 \textbf{Union compatibility}: 1) same number of attributes 2) same or compatible domains 3) do not have to use the same attribute names
 
@@ -263,7 +263,35 @@ $R \fullouterjoin S$ = $R \Join_\theta S\ \cup\ \{null(R)\} \times (dangle(S \Jo
 
 \subsection{Stored procedures}
 
-\includegraphics[width=9.0cm, height=4.5cm]{images/stored_procedures.png}
+\textbf{Function}
+\begin{lstlisting}[language=sql]
+CREATE OR REPLACE FUNCTION <name>
+    (param param_type,...)
+RETURNS ret_type AS $$
+    CODE
+$$ language PLPGSQL
+\end{lstlisting}
+
+\textbf{Stored procedures}
+\begin{lstlisting}[language=sql]
+CREATE OR REPLACE FUNCTION <name>
+    (param param_type,...)
+$$
+    CODE
+$$ language PLPGSQL
+\end{lstlisting}
+
+\textbf{Declaration}: DECLARE var\_name, var\_type;
+
+\textbf{IF-THEN-ELSE}: block specify with THEN and ends with END IF
+
+\textbf{loop}: 
+
+$LOOP\ EXIT\ [label]\ WHEN\ [condition]\ [stmt]\ END\ LOOP;$
+
+$\ WHILE\ [cond]\ LOOP\ [stmt]\ END\ LOOP;$
+
+$\ FOR\ [var_name]\ IN\ [LOWER...UPPER]\ LOOP\ [stmt]\ END\ LOOP$
 
 1. Return a single tuple from existing table by specify the table name as return type
 
@@ -273,9 +301,9 @@ $R \fullouterjoin S$ = $R \Join_\theta S\ \cup\ \{null(R)\} \times (dangle(S \Jo
 
 4. SETOF RECORD + OUT params for arbitrary table | TABLE + return paramters
 
-Procedure: a function has no return value
+% Procedure: a function has no return value
 
-Cursor:
+Cursor: Declare $\rightarrow$ Open $\rightarrow$ Fetch $\rightarrow$ Exit when not found $\rightarrow$ Close
 
 \includegraphics[width=7cm, height=4.5cm]{images/sql_cursor.png}
 
@@ -283,7 +311,7 @@ Cursor:
 
 Trigger: check if event occur. Binds \underline{trigger function} to operations on table or view; Trigger function: action executed
 
-\includegraphics[width=9cm, height=5cm]{images/trigger_syntax.png}
+% \includegraphics[width=9cm, height=5cm]{images/trigger_syntax.png}
 
 Note: must return a trigger; checks for insert or update statement for table downloads; inconsistent rows throw exception and effect will be rolled back
 
@@ -293,18 +321,23 @@ Note: must return a trigger; checks for insert or update statement for table dow
 
 \verb|AFTER| trigger is executed after the event. The event already occurred, cancellation done using \verb|EXCEPTION|.
 
+\textbf{Events}: INSERT, DELETE, UPDATE
 
-\textbf{OLD and NEW}
+\textbf{Variables}
 
 \textbf{NEW (OLD)} refers to the what the row like \textbf{after (before)} the operation
-
-\includegraphics[width=7cm, height=3.5cm]{images/trigger_view_syntax.png}
 
 \verb|INSERT|: new value (\verb|NEW|)
 
 \verb|UPDATE|: old value (\verb|OLD|) \& new value (\verb|NEW|)
 
 \verb|DELETE|: old value (\verb|OLD|)
+
+\textbf{Return Values}
+
+1) BEFORE INSERT/UPDATE/DELETE $\rightarrow$ NULL tuple: noting; NON-NULL tuple t: t will be inserted or updated but no effect on delete
+
+2) AFTER INSERT/UPDATE/DELETE $\rightarrow$ Return value has no effect completely
  
 \textbf{Conditions}
 
@@ -322,7 +355,20 @@ Trigger granularity: row-level trigger executes function for each tuple; stateme
 
 \includegraphics[width=7cm, height=2cm]{images/trigger_granularity.png}
 
-\textbf{Deferment}
+\textbf{Deferment}: check only after end of transaction, can only be AFTER and FOR EACH ROW trigger
+
+\begin{lstlisting}[language = sql]
+CREATE CONSTRAINT TRIGGER <trigger\_name> 
+<trigger\_timing> <trigger\_event> ON <trigger\_table>
+[ DEFERRABLE INITIALLY [ DEFERRED | IMMEDIATE ] ]
+FOR EACH <trigger\_granularity>
+[ WHEN <trigger\_condition> ]
+EXECUTE FUNCTION <trigger\_function\_name>(); 
+\end{lstlisting}
+
+\textbf{Activation order}
+
+BEFORE stmt $\rightarrow$ BEFORE row $\rightarrow$ EVENT for row $\rightarrow$ AFTER row $\rightarrow$ AFTER stmt
 
 \subsection{Functional dependencies}
 
@@ -338,7 +384,7 @@ $r$ of schema $R$ satisfies the functional dependencies $\sigma: X \rightarrow Y
 
 Set Functional Dependencies: $r$ satisfies all $\sigma \in \Sigma$ of $R$
 
-\textbf{ERD mapping with FDs}
+\textbf{\underline{ERD mapping with FDs}}
 
 1. Key attributes functionally determine the rest of the attributes.
 
@@ -362,7 +408,7 @@ Set Functional Dependencies: $r$ satisfies all $\sigma \in \Sigma$ of $R$
 
 3. \textbf{prime attributes}: $e \in R$ such that $e$ appears in some candidate key of $R$ with $\Sigma$
 
-
+4. \textbf{How to find}: always looking for the potential PK from the smallest cardinality; if an attribute does not appear in any RHS, it must be a PK; when growing from small cardinality, choose attributes that is not in the current attribute closure
 
 \textbf{Closure of FD}
 
@@ -434,13 +480,19 @@ for all \textit{X} $\rightarrow$ \textit{Y} $\in$ $\Sigma^{+}$, we have \textit{
 Given \textit{R'}, we may also denote the projection of $\Sigma$ on \textit{R'} by $\Sigma$|\textsubscript{\textit{R'}}.
 
 
-The \textbf{projection} $\Sigma|_{R'}$ is a subset of the \textbf{closure} $\Sigma^+$ (not necessarily just the original $\Sigma$) AND It includes \textbf{all FDs whose left-hand side and right-hand side are entirely contained in R'} (when applying the algorithm can ignore trivial FDs to get a simpler equivalent set)
+The \textbf{projection} $\Sigma|_{R'}$ is a subset of the \textbf{closure} $\Sigma^+$ (not necessarily just the original $\Sigma$) AND It includes \textbf{all FDs whose left-hand side and right-hand side are entirely contained in R'} (when applying the algorithm can ignore trivial FDs to get a simpler equivalent set). 
+
+Algorithms:
+
+Find all possible subset $R'' \subseteq R'$, calculate their attribute closure $S$, eliminate elements not in $R'$ and make them nontrivial. Can return the minimal cover only
 
 
 \textbf{Preservation}
 A decomposition of R with $\Sigma$ into $\delta = \{R_1, ..., R_n\}$ with the respective sets of functional dependencies $\Sigma|R_1, ..., \Sigma|R_n$ is dependency preserving if and only if
 
 $\Sigma^+ = (\Sigma|_{R_1} \cup ... \cup \Sigma|_{R_n})^+$
+
+\underline{\textbf{How to quickly determine?}} Look at all relation in the $\Sigma$ $\Rightarrow$ if LHS and RHS appear in the same, confirmed entailed $R_i$ $\Rightarrow$ if they appear on different sides, check LHS $\rightarrow$ (Common attributes) and (Common attributes) $\rightarrow$ RHS.
 
 \textbf{BCNF decomposition algorithm}
 
